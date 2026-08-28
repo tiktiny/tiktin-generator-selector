@@ -1,1 +1,68 @@
-{}
+{
+  "https://www.shmerling.co.il/wp-content/uploads/2024/09/1-4חופה-למגורים-מבט-על.pdf": {
+    "image": "plans/shmerling-plan-01.png"
+  },
+  "https://www.shmerling.co.il/wp-content/uploads/2024/09/חדר-עם-השתקה-למגורים-חתך.pdf": {
+    "pdf": "plans/shmerling-plan-02.pdf",
+    "dxf": "plans/shmerling-plan-02.dxf"
+  },
+  "https://www.shmerling.co.il/wp-content/uploads/2024/09/חדר-עם-השתקה-למגורים-מבט-על.pdf": {
+    "pdf": "plans/shmerling-plan-03.pdf",
+    "dxf": "plans/shmerling-plan-03.dxf"
+  },
+  "https://www.shmerling.co.il/wp-content/uploads/2024/09/חדר-עם-השתקה-למסחר-חתך.pdf": {
+    "pdf": "plans/shmerling-plan-04.pdf",
+    "dxf": "plans/shmerling-plan-04.dxf"
+  },
+  "https://www.shmerling.co.il/wp-content/uploads/2024/09/חדר-עם-השתקה-למסחר-מבט-על.pdf": {
+    "pdf": "plans/shmerling-plan-05.pdf",
+    "dxf": "plans/shmerling-plan-05.dxf"
+  },
+  "https://www.shmerling.co.il/wp-content/uploads/2024/09/חופה-למגורים-מבט-צד1-4.pdf": {
+    "image": "plans/shmerling-plan-06.png"
+  },
+  "https://www.shmerling.co.il/wp-content/uploads/2024/09/חופה-למסחר-מבט-על1-4-1.pdf": {
+    "image": "plans/shmerling-plan-07.png"
+  },
+  "https://www.shmerling.co.il/wp-content/uploads/2024/09/חופה-למסחר-מבט-צד-1-4-2.pdf": {
+    "image": "plans/shmerling-plan-08.png"
+  },
+  "https://www.shmerling.co.il/wp-content/uploads/2024/11/חופה-למסחר-מבט-על.png": {
+    "image": "plans/shmerling-plan-09.png"
+  },
+  "https://www.shmerling.co.il/wp-content/uploads/2024/11/חופה-למסחר-מבט-על1-4-1.pdf": {
+    "image": "plans/shmerling-plan-10.png"
+  },
+  "https://www.shmerling.co.il/wp-content/uploads/2024/11/חופה-למסחר-מבט-צד-1-4-2.pdf": {
+    "image": "plans/shmerling-plan-11.png"
+  },
+  "https://www.shmerling.co.il/wp-content/uploads/2024/11/חופה-למסחר-מבט-צד.png": {
+    "image": "plans/shmerling-plan-12.png"
+  },
+  "https://www.shmerling.co.il/wp-content/uploads/2024/11/חופת-פעמון-למגורים-מבט-על6.pdf": {
+    "image": "plans/shmerling-plan-13.png"
+  },
+  "https://www.shmerling.co.il/wp-content/uploads/2024/11/חופת-פעמון-למגורים-מבט-צד6.pdf": {
+    "image": "plans/shmerling-plan-14.png"
+  },
+  "https://www.shmerling.co.il/wp-content/uploads/2025/11/1-4חופה-למגורים-מבט-על.pdf": {
+    "image": "plans/shmerling-plan-15.png"
+  },
+  "https://www.shmerling.co.il/wp-content/uploads/2025/11/חדר-עם-השתקה-למסחר-חתך.pdf": {
+    "pdf": "plans/shmerling-plan-16.pdf",
+    "dxf": "plans/shmerling-plan-16.dxf"
+  },
+  "https://www.shmerling.co.il/wp-content/uploads/2025/11/חדר-עם-השתקה-למסחר-מבט-על.pdf": {
+    "pdf": "plans/shmerling-plan-17.pdf",
+    "dxf": "plans/shmerling-plan-17.dxf"
+  },
+  "https://www.shmerling.co.il/wp-content/uploads/2025/11/חופה-למגורים-מבט-צד1-4.pdf": {
+    "image": "plans/shmerling-plan-18.png"
+  },
+  "https://www.shmerling.co.il/wp-content/uploads/2025/11/חופת-פעמון-למגורים-מבט-על6.pdf": {
+    "image": "plans/shmerling-plan-19.png"
+  },
+  "https://www.shmerling.co.il/wp-content/uploads/2025/11/חופת-פעמון-למגורים-מבט-צד6.pdf": {
+    "image": "plans/shmerling-plan-20.png"
+  }
+}
