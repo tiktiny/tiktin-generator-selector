@@ -57,7 +57,7 @@ def download(url: str, target: Path) -> None:
     target.write_bytes(payload)
 
 
-def download_with_official_fallback(url: str, all_urls: list[str], target: Path) -> str:
+def download_with_official_fallback(url: str, all_urls: list[str], target: Path) -> tuple[Path, str]:
     """Download an official URL, falling back to the same official filename.
 
     Schmerling moved a few files between dated WordPress folders while older
@@ -65,19 +65,25 @@ def download_with_official_fallback(url: str, all_urls: list[str], target: Path)
     Schmerling domain and only accepts an exact decoded filename match.
     """
     filename = Path(urllib.parse.unquote(urllib.parse.urlparse(url).path)).name
-    candidates = [url]
-    candidates.extend(
+    source_candidates = [url]
+    source_candidates.extend(
         candidate for candidate in all_urls
         if candidate != url
         and Path(urllib.parse.unquote(urllib.parse.urlparse(candidate).path)).name == filename
     )
+    candidates: list[tuple[str, Path]] = [(candidate, target) for candidate in source_candidates]
+    if target.suffix.lower() == ".pdf":
+        decoded = urllib.parse.unquote(url)
+        preview_suffixes = ["-1-1.png", "-1-2.png"] if "מבט-על" in decoded else ["-1-2.png", "-1-1.png"]
+        for candidate in source_candidates:
+            candidates.extend((candidate + suffix, target.with_suffix(".png")) for suffix in preview_suffixes)
     failures = []
-    for candidate in candidates:
+    for candidate, candidate_target in candidates:
         try:
-            download(candidate, target)
+            download(candidate, candidate_target)
             if candidate != url:
                 print(f"Official fallback used: {candidate}")
-            return candidate
+            return candidate_target, candidate
         except Exception as error:  # keep trying exact-name official mirrors
             failures.append(f"{candidate}: {error}")
     raise RuntimeError("; ".join(failures))
@@ -158,14 +164,21 @@ def main() -> None:
         source_suffix = Path(urllib.parse.urlparse(url).path).suffix.lower() or ".pdf"
         base = f"shmerling-plan-{index:02d}"
         original = PLANS / f"{base}{source_suffix}"
-        if not original.exists():
+        stored = original
+        stored_from = url
+        existing_preview = original.with_suffix(".png")
+        if not original.exists() and existing_preview.exists():
+            stored = existing_preview
+        elif not original.exists():
             print(f"Downloading {index:02d}/{len(urls):02d}: {url}")
-            download_with_official_fallback(url, urls, original)
-        record = {"pdf" if source_suffix == ".pdf" else "image": f"plans/{original.name}"}
+            stored, stored_from = download_with_official_fallback(url, urls, original)
+        record = {"pdf" if stored.suffix.lower() == ".pdf" else "image": f"plans/{stored.name}"}
+        if stored_from != url:
+            record["storedFrom"] = stored_from
 
-        if source_suffix == ".pdf":
+        if stored.suffix.lower() == ".pdf":
             dxf = PLANS / f"{base}.dxf"
-            if (dxf.exists() and valid_dxf(dxf)) or convert_dxf(original, dxf):
+            if (dxf.exists() and valid_dxf(dxf)) or convert_dxf(stored, dxf):
                 record["dxf"] = f"plans/{dxf.name}"
                 dwg = PLANS / f"{base}.dwg"
                 if (dwg.exists() and dwg.stat().st_size > 200) or convert_dwg(dxf, dwg):
@@ -179,4 +192,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
