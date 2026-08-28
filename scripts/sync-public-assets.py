@@ -57,6 +57,32 @@ def download(url: str, target: Path) -> None:
     target.write_bytes(payload)
 
 
+def download_with_official_fallback(url: str, all_urls: list[str], target: Path) -> str:
+    """Download an official URL, falling back to the same official filename.
+
+    Schmerling moved a few files between dated WordPress folders while older
+    generator pages kept the previous links. The fallback stays on the official
+    Schmerling domain and only accepts an exact decoded filename match.
+    """
+    filename = Path(urllib.parse.unquote(urllib.parse.urlparse(url).path)).name
+    candidates = [url]
+    candidates.extend(
+        candidate for candidate in all_urls
+        if candidate != url
+        and Path(urllib.parse.unquote(urllib.parse.urlparse(candidate).path)).name == filename
+    )
+    failures = []
+    for candidate in candidates:
+        try:
+            download(candidate, target)
+            if candidate != url:
+                print(f"Official fallback used: {candidate}")
+            return candidate
+        except Exception as error:  # keep trying exact-name official mirrors
+            failures.append(f"{candidate}: {error}")
+    raise RuntimeError("; ".join(failures))
+
+
 def valid_dxf(path: Path) -> bool:
     if not path.exists() or path.stat().st_size < 200:
         return False
@@ -133,7 +159,8 @@ def main() -> None:
         base = f"shmerling-plan-{index:02d}"
         original = PLANS / f"{base}{source_suffix}"
         if not original.exists():
-            download(url, original)
+            print(f"Downloading {index:02d}/{len(urls):02d}: {url}")
+            download_with_official_fallback(url, urls, original)
         record = {"pdf" if source_suffix == ".pdf" else "image": f"plans/{original.name}"}
 
         if source_suffix == ".pdf":
