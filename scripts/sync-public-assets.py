@@ -97,6 +97,14 @@ def valid_dxf(path: Path) -> bool:
     return "SECTION" in text and "ENTITIES" in text and "LWPOLYLINE" in text and text.rstrip().endswith("EOF")
 
 
+def valid_roundtrip_dxf(path: Path) -> bool:
+    if not path.exists() or path.stat().st_size < 200:
+        return False
+    text = path.read_text(encoding="utf-8", errors="ignore").replace("\r\n", "\n")
+    has_geometry = any(f"\n{entity}\n" in text for entity in ("LWPOLYLINE", "POLYLINE", "LINE"))
+    return "SECTION" in text and "ENTITIES" in text and has_geometry and text.rstrip().endswith("EOF")
+
+
 def convert_dxf(pdf: Path, dxf: Path) -> bool:
     command = [sys.executable, str(ROOT / "scripts" / "pdf-vector-to-dxf.py"), str(pdf), str(dxf)]
     result = subprocess.run(command, text=True, capture_output=True)
@@ -146,11 +154,12 @@ def convert_dwg(dxf: Path, dwg: Path) -> bool:
     good = False
     for command in attempts:
         result = subprocess.run(command, text=True, capture_output=True)
-        if result.returncode == 0 and valid_dxf(roundtrip):
+        if result.returncode == 0 and valid_roundtrip_dxf(roundtrip):
             good = True
             break
     roundtrip.unlink(missing_ok=True)
     if not good:
+        print(f"DWG skipped for {dxf.name}: round-trip geometry validation failed")
         dwg.unlink(missing_ok=True)
     return good
 
@@ -170,6 +179,7 @@ def main() -> None:
         existing_preview = original.with_suffix(".png")
         if not original.exists() and existing_preview.exists():
             stored = existing_preview
+            stored_from = "official-preview"
         elif not original.exists():
             print(f"Downloading {index:02d}/{len(urls):02d}: {url}")
             stored, stored_from = download_with_official_fallback(url, urls, original)
