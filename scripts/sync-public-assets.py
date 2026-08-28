@@ -74,7 +74,8 @@ def download_with_official_fallback(url: str, all_urls: list[str], target: Path)
     candidates: list[tuple[str, Path]] = [(candidate, target) for candidate in source_candidates]
     if target.suffix.lower() == ".pdf":
         decoded = urllib.parse.unquote(url)
-        preview_suffixes = ["-1-1.png", "-1-2.png"] if "מבט-על" in decoded else ["-1-2.png", "-1-1.png"]
+        order = [1, 3, 5, 2, 4, 6] if "מבט-על" in decoded else [2, 4, 6, 1, 3, 5]
+        preview_suffixes = [f"-1-{number}.png" for number in order]
         for candidate in source_candidates:
             candidates.extend((candidate + suffix, target.with_suffix(".png")) for suffix in preview_suffixes)
     failures = []
@@ -192,3 +193,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
