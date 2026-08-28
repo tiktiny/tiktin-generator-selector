@@ -1,3 +1,4 @@
+// Published with locally stored Schmerling plan previews for PDF reports.
 let data=[],assets={};const missing="לא צוין באתר שמרלינג";
 const $=s=>document.querySelector(s),arr=v=>!v?[]:Array.isArray(v)?v:[v];
 const dimParts=v=>{const p=String(v||"").trim().split(/[xX×]/).map(x=>x.trim());return p.length===3&&p.every(Boolean)?p:null};
