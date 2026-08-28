@@ -97,6 +97,27 @@ def valid_dxf(path: Path) -> bool:
     return "SECTION" in text and "ENTITIES" in text and "LWPOLYLINE" in text and text.rstrip().endswith("EOF")
 
 
+def valid_png(path: Path) -> bool:
+    return path.exists() and path.stat().st_size > 500 and path.read_bytes()[:8] == b"\x89PNG\r\n\x1a\n"
+
+
+def convert_pdf_preview(pdf: Path, preview: Path) -> bool:
+    renderer = find_tool("pdftoppm")
+    if not renderer:
+        return False
+    output_prefix = preview.with_suffix("")
+    result = subprocess.run(
+        [renderer, "-png", "-f", "1", "-singlefile", "-r", "160", str(pdf), str(output_prefix)],
+        text=True,
+        capture_output=True,
+    )
+    if result.returncode != 0 or not valid_png(preview):
+        preview.unlink(missing_ok=True)
+        print(f"PDF preview skipped for {pdf.name}: {result.stderr.strip() or result.stdout.strip()}")
+        return False
+    return True
+
+
 def valid_roundtrip_dxf(path: Path) -> bool:
     if not path.exists() or path.stat().st_size < 200:
         return False
@@ -188,6 +209,9 @@ def main() -> None:
             record["storedFrom"] = stored_from
 
         if stored.suffix.lower() == ".pdf":
+            preview = PLANS / f"{base}-preview.png"
+            if (preview.exists() and valid_png(preview)) or convert_pdf_preview(stored, preview):
+                record["preview"] = f"plans/{preview.name}"
             dxf = PLANS / f"{base}.dxf"
             if (dxf.exists() and valid_dxf(dxf)) or convert_dxf(stored, dxf):
                 record["dxf"] = f"plans/{dxf.name}"
