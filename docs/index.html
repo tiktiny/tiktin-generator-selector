@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#103534"><title>בחירת גנרטור - משרד טיקטין חשמל</title>
+  <link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icons/generator-192.png"><link rel="apple-touch-icon" href="icons/generator-180.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header>
+  <div class="brands"><img src="tiktin-logo.png" alt="טיקטין תכנון חשמל"><div><b>משרד טיקטין חשמל</b><small>מבוסס על סרגל חברת שמרלינג</small></div><img class="shmerling" src="shmerling-logo.png" alt="שמרלינג"></div>
+  <h1>בחירת גנרטור</h1><p>נתוני גנרטור, חדר מושתק, חופות ותוכניות להורדה.</p>
+  <form id="selector"><input id="kva" type="number" placeholder="לדוגמה: 500" aria-label="הספק KVA"><button>הצג נתונים</button></form>
+  <select id="models" aria-label="בחירת הספק"><option value="">או בחרו הספק מהרשימה</option></select>
+</header>
+<main><div id="notice"></div><div id="result" class="empty">בחרו הספק כדי להתחיל</div></main>
+<footer>משרד טיקטין חשמל · הנתונים מבוססים על אתר שמרלינג ונדרש לאמתם לפני ביצוע.<strong>פותח ע״י יובל טיקטין בסיוע AI</strong></footer>
+<script src="app.js" defer></script>
+</body></html>

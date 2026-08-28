@@ -1,0 +1,46 @@
+name: Sync official plans
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - app/shmerling-data.json
+      - scripts/sync-public-assets.py
+      - scripts/pdf-vector-to-dxf.py
+      - .github/workflows/sync-plans.yml
+
+permissions:
+  contents: write
+
+jobs:
+  plans:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install PDF and CAD tools
+        run: |
+          python -m pip install --disable-pip-version-check pypdf
+          sudo apt-get update
+          sudo apt-get install -y autoconf automake libtool pkg-config libxml2-dev libpcre2-dev
+          git clone --depth 1 https://github.com/LibreDWG/libredwg.git /tmp/libredwg
+          cd /tmp/libredwg
+          ./autogen.sh
+          ./configure --disable-bindings --disable-shared
+          make -j2
+          sudo make install
+          sudo ldconfig
+      - name: Download and validate plans
+        run: |
+          python scripts/sync-public-assets.py
+          node scripts/validate-static-app.mjs
+      - name: Save local PDF, DXF and DWG files
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add docs/plans docs/plan-assets.json
+          git diff --cached --quiet || git commit -m "Store validated Schmerling plan files"
+          git push
