@@ -40,8 +40,9 @@ def applicable_urls() -> list[str]:
 
 
 def download(url: str, target: Path) -> None:
+    safe_url = urllib.parse.quote(url, safe=":/%?=&")
     request = urllib.request.Request(
-        url,
+        safe_url,
         headers={"User-Agent": "Mozilla/5.0 TiktinGeneratorSelector/1.0"},
     )
     with urllib.request.urlopen(request, timeout=90) as response:
@@ -151,3 +152,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
