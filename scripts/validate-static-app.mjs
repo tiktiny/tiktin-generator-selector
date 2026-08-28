@@ -19,7 +19,9 @@ for (const [index, row] of data.entries()) {
     for (const url of list(variant.plans).filter((value) => !decodeURIComponent(value).includes("ללא-השתקה"))) {
       const record = assets[url];
       if (!record) continue;
-      for (const [format, relative] of Object.entries(record)) {
+      for (const format of ["pdf", "image", "preview", "dxf", "dwg"]) {
+        const relative = record[format];
+        if (!relative) continue;
         const file = join(docs, relative);
         const info = await stat(file);
         if (info.size < 200) throw new Error(`${row.kva} ${mode}: ${format} file is empty`);
@@ -34,3 +36,4 @@ for (const [index, row] of data.entries()) {
   console.log(`PASS ${String(index + 1).padStart(2, "0")}/39 | ${row.kva} KVA | room65=${!!row.room65} canopy65=${!!row.canopy65} canopy75=${!!row.canopy75}`);
 }
 console.log(`PASS: all 39 generator selections validated; ${advertised} local downloads verified.`);
+
