@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#103534">
+  <title>דוח גנרטור - משרד טיקטין חשמל</title>
+</head>
+<body>
+  <p style="font:700 18px Arial;text-align:center;margin:48px;color:#173b39">מכין את דוח הגנרטור…</p>
+  <script>
+    (function () {
+      var report = sessionStorage.getItem("tiktin-generator-report");
+      if (!report) {
+        location.replace("./");
+        return;
+      }
+      document.open();
+      document.write(report);
+      document.close();
+    }());
+  </script>
+  <noscript>יש להפעיל JavaScript כדי להציג את הדוח.</noscript>
+</body>
+</html>
