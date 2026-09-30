@@ -8,6 +8,50 @@ const num=v=>v&&/^\d[\d,.]*$/.test(String(v).trim())?v:missing;
 const modelOf=g=>[g.room65?.model,g.canopy65?.model,g.canopy75?.model].find(v=>v&&/^[A-Z0-9-]+S$/i.test(v))||missing;
 const planName=(url,i)=>{const u=decodeURIComponent(url),view=u.includes("מבט-על")?"מבט על":u.includes("חתך")?"חתך":u.includes("מבט-צד")?"מבט צד":`תוכנית ${i+1}`,use=u.includes("למגורים")?"למגורים":u.includes("למסחר")?"למסחר / תעשייה":"";return `${view}${use?` · ${use}`:""}`};
 const exhaustNote="אם האגזוז עולה לגג או שקצה האגזוז מרוחק מהגנרטור יותר מ־10 מטר, נדרש להגדיל את קוטר האגזוז.";
+const EXH_STD=[4,5,6,8,10,12,14,16,18,20,22,24];
+const EXH_OD_MM={4:114.3,5:141.3,6:168.3,8:219.1,10:273,12:323.9,14:355.6,16:406.4,18:457.2,20:508,22:559,24:610};
+function exhaustBase(g){const v=parseFloat(g?.room65?.exhaust);return Number.isFinite(v)&&v>0?v:4}
+function nextExhaustSize(v,min){const need=Math.max(v,min);return EXH_STD.find(x=>x>=need)||EXH_STD.at(-1)}
+function exhaustOutsideMm(d){const od=EXH_OD_MM[d]||d*25.4,add=d<=8?100:d<=16?150:200;return Math.ceil((od+add)/10)*10}
+function exhaustEstimate(g,horiz,vert,bends){
+  const base=exhaustBase(g),d0=base*0.0254,straight=Math.max(0,Number(horiz)||0)+Math.max(0,Number(vert)||0);
+  const n=Math.max(1,Math.min(4,Math.round(Number(bends)||4))),equiv=straight+n*20*d0;
+  const raw=base*Math.pow(Math.max(10,equiv)/10,.20),dia=nextExhaustSize(raw,base);
+  return {base,dia,outside:exhaustOutsideMm(dia),bends:n}
+}
+function roomAirMetrics(r){
+  let html=metric("כניסת אוויר · 65dB",num(r?.silencedAirIn),"מ״ר")+metric("יציאת אוויר · 65dB",num(r?.silencedAirOut),"מ״ר");
+  if(r?.rawAirIn||r?.rawAirOut)html+=metric("כניסה ללא השתקה",num(r?.rawAirIn),"מ״ר")+metric("יציאה ללא השתקה",num(r?.rawAirOut),"מ״ר");
+  return html
+}
+window.openExhaust=k=>{
+  window.closeExhaust();
+  const g=data.find(x=>x.kva===k);if(!g)return;
+  document.body.classList.add("modal-open");
+  const box=document.createElement("div");box.className="exhaust-overlay";
+  box.innerHTML=`<div class="exhaust-dialog" role="dialog" aria-modal="true" aria-labelledby="exhaust-title">
+    <button class="share-close" onclick="closeExhaust()" aria-label="סגירה">×</button>
+    <h3 id="exhaust-title">בדיקת קוטר אגזוז · ${k.toLocaleString()} KVA</h3>
+    <p>הערכה ראשונית לפי קוטר מוצא הגנרטור והתוואי. ברירת המחדל היא 4 כיפופי 90°.</p>
+    <div class="exhaust-fields">
+      <label><span>אורך אופקי עד הפיר [מ׳]</span><input id="exh-h" type="number" min="0" step="0.5" value="5"></label>
+      <label><span>גובה הפיר עד הגג [מ׳]</span><input id="exh-v" type="number" min="0" step="0.5" value="30"></label>
+      <label><span>מספר כיפופי 90°</span><select id="exh-b"><option>1</option><option>2</option><option>3</option><option selected>4</option></select></label>
+    </div>
+    <button class="exhaust-calc" type="button">חשב קוטר</button>
+    <div class="exhaust-result"></div>
+    <small>התוצאה היא הערכת תכנון בלבד. יש לאמת את הקוטר הסופי מול יצרן המנוע/ספק מערכת הפליטה.</small>
+  </div>`;
+  const calc=()=>{
+    const r=exhaustEstimate(g,box.querySelector("#exh-h").value,box.querySelector("#exh-v").value,box.querySelector("#exh-b").value);
+    box.querySelector(".exhaust-result").innerHTML=`<div><span>קוטר אגזוז מוערך</span><b>${r.dia}″</b></div><div><span>קוטר חיצוני אחרי בידוד</span><b>כ־${r.outside} מ״מ</b></div>`;
+  };
+  box.querySelector(".exhaust-calc").addEventListener("click",calc);
+  box.addEventListener("click",e=>{if(e.target===box)window.closeExhaust()});
+  document.body.append(box);calc()
+};
+window.closeExhaust=()=>{document.querySelector(".exhaust-overlay")?.remove();if(!document.querySelector(".share-overlay")&&!document.querySelector(".plan-overlay"))document.body.classList.remove("modal-open")};
+
 function metric(n,v,u="",note=""){return `<div class="metric"><span>${n}</span><b>${v}${v!==missing&&u?` ${u}`:""}</b>${note?`<small>${note}</small>`:""}</div>`}
 function planPreview(url){const a=assets[url]||{};return a.preview||a.image||null}
 function plans(v,label){if(!v)return `<p>תצורה זו אינה זמינה באתר שמרלינג.</p>`;const p=arr(v.plans).filter(x=>!decodeURIComponent(x).includes("ללא-השתקה"));let html=p.length?p.map((url,i)=>{const preview=planPreview(url);return preview?`<button type="button" class="plan-view" data-plan-src="${preview}" data-plan-title="${planName(url,i)}" onclick="openPlan(this.dataset.planSrc,this.dataset.planTitle)">הצגת ${planName(url,i)}</button>`:""}).join(""):`<span>לא צורפה תוכנית מתאימה באתר שמרלינג</span>`;html+=`<a class="source" href="${v.url}" target="_blank" rel="noopener">מקור רשמי</a><small class="dxf-note">לקבלת קובצי DXF יש לעבור לאתר שמרלינג באמצעות כפתור „מקור רשמי”.</small>`;return `<div class="plans">${html}</div>`}
@@ -111,7 +155,7 @@ async function shareReportPdf(){
   }
 }
 </script></body></html>`;sessionStorage.setItem("tiktin-generator-report",reportHtml);location.href="report.html"}
-function show(g,msg=""){const r=g.room65,a=g.canopy65,b=g.canopy75;$("#notice").innerHTML=msg?`<div class="notice">${msg}</div>`:"";$("#result").className="";$("#result").innerHTML=`<button class="back" onclick="back()">← חזור לבחירת גנרטור</button><div class="top"><div><small>הגנרטור המתאים</small><h2>${modelOf(g)}</h2><b>${g.kva.toLocaleString()} KVA Standby</b></div><div class="actions"><button onclick="copyData(${g.kva})">העתקת נתונים</button><button onclick="openShare(${g.kva})">שליחה במייל / PDF</button><button onclick="back()">חזור</button></div></div><div class="grid"><section class="card"><h3>01 · הגנרטור</h3>${dimensions(r?.generatorDimensions)}<div class="metrics">${metric("משקל",num(r?.generatorWeight),"ק״ג")}${metric("קוטר אגזוז",num(r?.exhaust),"אינץ׳",exhaustNote)}</div></section><section class="card"><h3>02 · חדר מושתק למגורים</h3>${dimensions(r?.roomDimensions)}<div class="metrics">${metric("כניסת אוויר",num(r?.silencedAirIn),"מ״ר")}${metric("יציאת אוויר",num(r?.silencedAirOut),"מ״ר")}</div>${plans(r,"חדר")}</section><section class="card wide"><h3>03 · חופות אקוסטיות</h3><div class="canopies"><div class="canopy"><b>למגורים · 65dB ב־7 מטר</b>${dimensions(a?.dimensions)}${metric("משקל כולל",num(a?.weight),"ק״ג")}${plans(a,"65")}</div><div class="canopy"><b>מסחר / תעשייה · 75dB ב־7 מטר</b>${dimensions(b?.dimensions)}${metric("משקל כולל",num(b?.weight),"ק״ג")}${plans(b,"75")}</div></div></section></div>`;scrollTo({top:0,behavior:"smooth"})}
+function show(g,msg=""){const r=g.room65,a=g.canopy65,b=g.canopy75;$("#notice").innerHTML=msg?`<div class="notice">${msg}</div>`:"";$("#result").className="";$("#result").innerHTML=`<button class="back" onclick="back()">← חזור לבחירת גנרטור</button><div class="top"><div><small>הגנרטור המתאים</small><h2>${modelOf(g)}</h2><b>${g.kva.toLocaleString()} KVA Standby</b></div><div class="actions"><button onclick="openExhaust(${g.kva})">בדיקת קוטר אגזוז</button><button onclick="copyData(${g.kva})">העתקת נתונים</button><button onclick="openShare(${g.kva})">שליחה במייל / PDF</button><button onclick="back()">חזור</button></div></div><div class="grid"><section class="card"><h3>01 · הגנרטור</h3>${dimensions(r?.generatorDimensions)}<div class="metrics">${metric("משקל",num(r?.generatorWeight),"ק״ג")}${metric("קוטר אגזוז",num(r?.exhaust),"אינץ׳",exhaustNote)}</div></section><section class="card"><h3>02 · חדר מושתק למגורים</h3>${dimensions(r?.roomDimensions)}<div class="metrics">${roomAirMetrics(r)}</div>${r?.note?`<div class="notice">${r.note}</div>`:""}${plans(r,"חדר")}</section><section class="card wide"><h3>03 · חופות אקוסטיות</h3><div class="canopies"><div class="canopy"><b>למגורים · 65dB ב־7 מטר</b>${dimensions(a?.dimensions)}${metric("משקל כולל",num(a?.weight),"ק״ג")}${plans(a,"65")}</div><div class="canopy"><b>מסחר / תעשייה · 75dB ב־7 מטר</b>${dimensions(b?.dimensions)}${metric("משקל כולל",num(b?.weight),"ק״ג")}${plans(b,"75")}</div></div></section></div>`;scrollTo({top:0,behavior:"smooth"})}
 function choose(n){if(!n)return;const exact=data.find(x=>x.kva===n),g=exact||data.find(x=>x.kva>=n);if(!g){$("#notice").innerHTML=`<div class="notice">מעל ${data.at(-1).kva} KVA נדרש תכנון מיוחד</div>`;return}show(g,exact?"":`מוצג ההספק הקרוב כלפי מעלה: ${g.kva} KVA`)}
 window.back=()=>{$("#notice").innerHTML="";$("#result").className="empty";$("#result").textContent="בחרו הספק כדי להתחיל";$("#kva").value="";$("#models").value=""};
 window.copyData=k=>navigator.clipboard.writeText(summary(data.find(x=>x.kva===k)));
