@@ -162,3 +162,75 @@ window.copyData=k=>navigator.clipboard.writeText(summary(data.find(x=>x.kva===k)
 Promise.all([fetch("data.json").then(r=>r.json()),fetch("plan-assets.json").then(r=>r.json()).catch(()=>({}))]).then(([d,a])=>{data=d;assets=a;$("#models").innerHTML+=data.map(x=>`<option value="${x.kva}">${x.kva.toLocaleString()} KVA · ${modelOf(x)}</option>`).join("")});
 $("#selector").addEventListener("submit",e=>{e.preventDefault();choose(Number($("#kva").value))});$("#models").addEventListener("change",e=>choose(Number(e.target.value)));
 
+
+
+/* ---------- שדות קלט: ניקוי מהיר + החלפה בהקלדה ---------- */
+function isClearableInput(el){
+  return el instanceof HTMLInputElement &&
+    !el.disabled && !el.readOnly &&
+    !["button","submit","reset","checkbox","radio","file","hidden","range","color"].includes((el.type||"text").toLowerCase());
+}
+function enhanceClearableInput(input){
+  if(!isClearableInput(input)||input.dataset.clearEnhanced==="1")return;
+  input.dataset.clearEnhanced="1";
+  const parent=input.parentElement, cs=getComputedStyle(input);
+  const wrap=document.createElement("span");
+  wrap.className="clearable-field";
+  if(parent&&["flex","inline-flex"].includes(getComputedStyle(parent).display)) wrap.style.flex=cs.flex;
+  wrap.style.gridColumn=cs.gridColumn;
+  wrap.style.gridRow=cs.gridRow;
+  parent.insertBefore(wrap,input);
+  wrap.appendChild(input);
+  const clear=document.createElement("button");
+  clear.type="button";
+  clear.className="field-clear-btn";
+  clear.setAttribute("aria-label","נקה שדה");
+  clear.title="נקה שדה";
+  clear.textContent="×";
+  clear.tabIndex=-1;
+  wrap.appendChild(clear);
+  const sync=()=>{clear.hidden=!input.value};
+  clear.addEventListener("pointerdown",e=>e.preventDefault());
+  clear.addEventListener("click",()=>{
+    input.value="";
+    delete input.dataset.replaceOnType;
+    input.dispatchEvent(new Event("input",{bubbles:true}));
+    input.dispatchEvent(new Event("change",{bubbles:true}));
+    input.focus();
+    sync();
+  });
+  input.addEventListener("focus",()=>{
+    if(input.value==="")return;
+    input.dataset.replaceOnType="1";
+    setTimeout(()=>{try{input.select()}catch(e){}},0);
+  });
+  input.addEventListener("beforeinput",e=>{
+    if(input.dataset.replaceOnType!=="1")return;
+    if(!String(e.inputType||"").startsWith("insert"))return;
+    input.value="";
+    delete input.dataset.replaceOnType;
+    sync();
+  });
+  input.addEventListener("keydown",e=>{
+    if(input.dataset.replaceOnType!=="1")return;
+    if(e.ctrlKey||e.metaKey||e.altKey||["ArrowLeft","ArrowRight","ArrowUp","ArrowDown","Home","End","Tab","Escape"].includes(e.key)){
+      delete input.dataset.replaceOnType;
+    }
+  });
+  input.addEventListener("input",()=>{delete input.dataset.replaceOnType;sync()});
+  input.addEventListener("change",sync);
+  input.addEventListener("blur",()=>delete input.dataset.replaceOnType);
+  sync();
+}
+function enhanceAllInputs(root=document){
+  root.querySelectorAll("input").forEach(enhanceClearableInput);
+}
+enhanceAllInputs();
+new MutationObserver(muts=>{
+  muts.forEach(m=>m.addedNodes.forEach(n=>{
+    if(n.nodeType!==1)return;
+    if(n.matches?.("input"))enhanceClearableInput(n);
+    enhanceAllInputs(n);
+  }));
+}).observe(document.body,{childList:true,subtree:true});
+
