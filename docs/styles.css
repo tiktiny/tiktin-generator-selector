@@ -48,3 +48,9 @@
 .field-clear-btn:hover{background:#dce9e7;color:#103534;border:0}
 .field-clear-btn[hidden]{display:none!important}
 
+
+.exhaust-stale{grid-column:1/-1;background:#fff7e5!important;border:1px solid #ead6a5!important;color:#8a5a16;font-weight:700;line-height:1.55}
+@media(max-width:680px){
+  .exhaust-fields input,.exhaust-fields select{font-size:16px!important;line-height:1.25}
+  .exhaust-dialog{width:min(620px,100%);max-width:100%;transform:none!important}
+}
