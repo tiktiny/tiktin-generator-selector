@@ -1,6 +1,6 @@
 
 /* ---------- בדיקת גרסה אוטומטית ---------- */
-const APP_VERSION="V7";
+const APP_VERSION="V8";
 async function checkForAppUpdate(){
   try{
     const r=await fetch("version.json?ts="+Date.now(),{cache:"no-store"});
@@ -28,15 +28,87 @@ const planName=(url,i)=>{const u=decodeURIComponent(url),view=u.includes("מבט
 const exhaustNote="אם האגזוז עולה לגג או שקצה האגזוז מרוחק מהגנרטור יותר מ־10 מטר, נדרש להגדיל את קוטר האגזוז.";
 const EXH_STD=[4,5,6,8,10,12,14,16,18,20,22,24];
 const EXH_OD_MM={4:114.3,5:141.3,6:168.3,8:219.1,10:273,12:323.9,14:355.6,16:406.4,18:457.2,20:508,22:559,24:610};
+
+/*
+  נתוני פליטה בעומס Standby / ESP, 50Hz.
+  q = ספיקת גזי פליטה m3/min, t = טמפרטורה °C, bp = לחץ נגדי מרבי kPa.
+  הנתונים משמשים לחישוב פנימי בלבד ואינם מוצגים למשתמש.
+*/
+const EXH_ENGINE={
+  220:{engine:"Baudouin 6M16G220/5",q:38.15,t:600,bp:6.0,direct:true},
+  250:{engine:"Baudouin 6M16G250/5",q:44.4,t:600,bp:6.0,direct:true},
+  275:{engine:"Baudouin 6M16G275/5",q:50.6,t:600,bp:6.0,direct:true},
+  300:{engine:"Baudouin 6M16G300/5",q:53.0,t:700,bp:6.0,direct:true},
+  330:{engine:"Baudouin 6M16G350/5",q:58.2,t:550,bp:11.0,direct:true},
+  360:{engine:"Hyundai/Doosan DP126LB",q:58.3,t:590,bp:5.9,direct:true},
+  400:{engine:"Baudouin 6M21G400/5",q:65.0,t:580,bp:12.0,direct:true},
+  440:{engine:"Baudouin 6M21G440/5",q:69.0,t:580,bp:12.0,direct:true},
+  450:{engine:"Baudouin 6M21G440/5",q:69.0,t:580,bp:12.0,direct:true},
+  500:{engine:"Baudouin 6M21G500/5",q:99.0,t:580,bp:12.0,direct:true},
+  580:{engine:"Hyundai/Doosan DP180LA",q:106.0,t:562,bp:5.9,direct:true},
+  630:{engine:"Hyundai/Doosan DP180LA",q:106.0,t:562,bp:5.9,direct:true},
+  715:{engine:"Baudouin 6M33G715/5",q:140.7,t:550,bp:7.5,direct:true},
+  750:{engine:"Hyundai/Doosan DP222LC",q:108.0,t:502,bp:5.9,direct:true},
+  825:{engine:"Hyundai/Doosan DP222LC",q:108.0,t:502,bp:5.9,direct:true},
+  900:{engine:"Hyundai/Doosan DP222CB",q:136.0,t:570,bp:5.9,direct:true},
+  1000:{engine:"Hyundai/Doosan DP222CC",q:147.0,t:575,bp:5.9,direct:true},
+  1100:{engine:"Perkins 4008-30TAG2",q:201.0,t:500,bp:8.0,direct:true},
+  1250:{engine:"Perkins 4008-30TAG3",q:203.0,t:473,bp:7.0,direct:true},
+  1400:{engine:"Mitsubishi S12R-PTA-C",q:258.0,t:520,bp:5.9,direct:true},
+  1540:{engine:"Mitsubishi S12R-PTAA2",q:312.0,t:520,bp:5.88,direct:true},
+  1650:{engine:"Mitsubishi S12R-PTAA2",q:343.0,t:520,bp:5.9,direct:true},
+  1915:{engine:"Mitsubishi S16R-PTA",q:339.0,t:539,bp:5.9,direct:true},
+  2100:{engine:"Mitsubishi S16R-PTA2",q:343.0,t:524,bp:5.9,direct:true},
+  2200:{engine:"Mitsubishi S16R-PTA2 class",q:360.0,t:524,bp:5.9,direct:false},
+  2500:{engine:"Mitsubishi S16R2-PTAW",q:506.0,t:550,bp:5.88,direct:true},
+  2800:{engine:"Mitsubishi S16R2-PTAW-E",q:536.0,t:550,bp:5.9,direct:true}
+};
 function exhaustBase(g){const v=parseFloat(g?.room65?.exhaust);return Number.isFinite(v)&&v>0?v:4}
-function nextExhaustSize(v,min){const need=Math.max(v,min);return EXH_STD.find(x=>x>=need)||EXH_STD.at(-1)}
 function exhaustOutsideMm(d){const od=EXH_OD_MM[d]||d*25.4,add=d<=8?100:d<=16?150:200;return Math.ceil((od+add)/10)*10}
-function exhaustEstimate(g,horiz,vert,bends){
-  const base=exhaustBase(g),d0=base*0.0254,straight=Math.max(0,Number(horiz)||0)+Math.max(0,Number(vert)||0);
-  const n=Math.max(1,Math.min(4,Math.round(Number(bends)||4))),equiv=straight+n*20*d0;
-  const raw=base*Math.pow(Math.max(10,equiv)/10,.20),dia=nextExhaustSize(raw,base);
-  return {base,dia,outside:exhaustOutsideMm(dia),bends:n}
+function exhaustProfile(g){
+  const kva=Number(g?.kva)||0;
+  if(EXH_ENGINE[kva])return EXH_ENGINE[kva];
+  if(kva<220)return {engine:"אומדן לפי הספק",q:Math.max(1.8,kva*0.18),t:600,bp:6.0,direct:false};
+  const keys=Object.keys(EXH_ENGINE).map(Number).sort((a,b)=>a-b);
+  if(kva<=keys[0])return EXH_ENGINE[keys[0]];
+  if(kva>=keys.at(-1))return EXH_ENGINE[keys.at(-1)];
+  let lo=keys[0],hi=keys.at(-1);
+  for(let i=0;i<keys.length-1;i++){
+    if(kva>keys[i]&&kva<keys[i+1]){lo=keys[i];hi=keys[i+1];break}
+  }
+  const a=EXH_ENGINE[lo],b=EXH_ENGINE[hi],r=(kva-lo)/(hi-lo);
+  return {engine:"אינטרפולציה בין נתוני מנוע",q:a.q+(b.q-a.q)*r,t:a.t+(b.t-a.t)*r,bp:Math.min(a.bp,b.bp),direct:false};
 }
+function exhaustPipeState(dIn,profile,straight,bends){
+  const D=dIn*0.0254,area=Math.PI*D*D/4;
+  const velocity=(profile.q/60)/area;
+  const tempK=profile.t+273.15;
+  const rho=1.184*298.15/tempK;
+  const mu=1.716e-5*Math.pow(tempK/273.15,1.5)*(273.15+111)/(tempK+111);
+  const re=Math.max(4000,rho*velocity*D/mu);
+  const rough=0.00015;
+  const friction=0.25/Math.pow(Math.log10(rough/(3.7*D)+5.74/Math.pow(re,0.9)),2);
+  const equivLength=straight+bends*16*D+1.0;
+  const dpKPa=friction*(equivLength/D)*(rho*velocity*velocity/2)/1000;
+  return {velocity,dpKPa,equivLength};
+}
+function exhaustEstimate(g,horiz,vert,bends){
+  const base=exhaustBase(g);
+  const straight=Math.max(0,Number(horiz)||0)+Math.max(0,Number(vert)||0);
+  const n=Math.max(1,Math.min(4,Math.round(Number(bends)||4)));
+  const profile=exhaustProfile(g);
+  const pipeBudget=Math.max(0.8,profile.bp*0.35);
+  const maxVelocity=40;
+  let dia=EXH_STD.at(-1),state=null;
+  for(const d of EXH_STD){
+    if(d<base)continue;
+    const s=exhaustPipeState(d,profile,straight,n);
+    if(s.dpKPa<=pipeBudget&&s.velocity<=maxVelocity){dia=d;state=s;break}
+  }
+  if(!state)state=exhaustPipeState(dia,profile,straight,n);
+  return {base,dia,outside:exhaustOutsideMm(dia),bends:n,direct:!!profile.direct};
+}
+
 function roomAirMetrics(r){
   return metric("כניסת אוויר · 65dB",num(r?.silencedAirIn),"מ״ר")+
          metric("יציאת אוויר · 65dB",num(r?.silencedAirOut),"מ״ר");
@@ -57,7 +129,7 @@ window.openExhaust=k=>{
     </div>
     <button class="exhaust-calc" type="button">חשב קוטר</button>
     <div class="exhaust-result"></div>
-    <small>התוצאה היא הערכת תכנון בלבד. יש לאמת את הקוטר הסופי מול יצרן המנוע/ספק מערכת הפליטה.</small>
+    <small>ההערכה מבוססת ככל האפשר על נתוני פליטת המנוע, עם עתודה למשתיק מגורים. יש לאמת קוטר סופי מול יצרן המנוע/ספק מערכת הפליטה.</small>
   </div>`;
   const result=box.querySelector(".exhaust-result");
   const calc=()=>{
@@ -72,7 +144,8 @@ window.openExhaust=k=>{
   box.querySelector("#exh-v").addEventListener("input",invalidate);
   box.querySelector("#exh-b").addEventListener("change",invalidate);
   box.addEventListener("click",e=>{if(e.target===box)window.closeExhaust()});
-  document.body.append(box);calc()
+  document.body.append(box);
+  result.innerHTML='<div class="exhaust-stale">הזן את נתוני התוואי ובסיום לחץ על „חשב קוטר”.</div>';
 };
 window.closeExhaust=()=>{document.querySelector(".exhaust-overlay")?.remove();if(!document.querySelector(".share-overlay")&&!document.querySelector(".plan-overlay"))document.body.classList.remove("modal-open")};
 
