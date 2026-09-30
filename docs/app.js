@@ -1,6 +1,6 @@
 
 /* ---------- בדיקת גרסה אוטומטית ---------- */
-const APP_VERSION="V5";
+const APP_VERSION="V6";
 async function checkForAppUpdate(){
   try{
     const r=await fetch("version.json?ts="+Date.now(),{cache:"no-store"});
@@ -223,9 +223,13 @@ function enhanceClearableInput(input){
   });
   input.addEventListener("beforeinput",e=>{
     if(input.dataset.replaceOnType!=="1")return;
-    if(!String(e.inputType||"").startsWith("insert"))return;
-    input.value="";
+    const t=String(e.inputType||"");
+    if(!["insertText","insertCompositionText","insertReplacementText"].includes(t))return;
+    if(e.data==null)return;
+    e.preventDefault();
+    input.value=String(e.data);
     delete input.dataset.replaceOnType;
+    input.dispatchEvent(new Event("input",{bubbles:true}));
     sync();
   });
   input.addEventListener("keydown",e=>{
