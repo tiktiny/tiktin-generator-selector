@@ -1,6 +1,6 @@
 
 /* ---------- בדיקת גרסה אוטומטית ---------- */
-const APP_VERSION="V8";
+const APP_VERSION="V9";
 async function checkForAppUpdate(){
   try{
     const r=await fetch("version.json?ts="+Date.now(),{cache:"no-store"});
