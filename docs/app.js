@@ -20,9 +20,8 @@ function exhaustEstimate(g,horiz,vert,bends){
   return {base,dia,outside:exhaustOutsideMm(dia),bends:n}
 }
 function roomAirMetrics(r){
-  let html=metric("כניסת אוויר · 65dB",num(r?.silencedAirIn),"מ״ר")+metric("יציאת אוויר · 65dB",num(r?.silencedAirOut),"מ״ר");
-  if(r?.rawAirIn||r?.rawAirOut)html+=metric("כניסה ללא השתקה",num(r?.rawAirIn),"מ״ר")+metric("יציאה ללא השתקה",num(r?.rawAirOut),"מ״ר");
-  return html
+  return metric("כניסת אוויר · 65dB",num(r?.silencedAirIn),"מ״ר")+
+         metric("יציאת אוויר · 65dB",num(r?.silencedAirOut),"מ״ר");
 }
 window.openExhaust=k=>{
   window.closeExhaust();
