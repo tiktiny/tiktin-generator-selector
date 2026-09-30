@@ -39,3 +39,12 @@
 .exhaust-dialog>small{display:block;color:#8a5a16;font-weight:700;line-height:1.5}
 .version-line{margin-top:7px;font-size:12px;opacity:.75}
 @media(max-width:680px){.exhaust-dialog{padding:22px 16px}.exhaust-fields,.exhaust-result{grid-template-columns:1fr}.exhaust-fields label:last-child{grid-column:auto}}
+
+
+/* שדות קלט — × בצד שמאל */
+.clearable-field{position:relative;display:flex;width:100%;min-width:0;align-items:center}
+.clearable-field>input{width:100%!important;min-width:0;padding-left:36px!important}
+.field-clear-btn{position:absolute;left:6px;top:50%;transform:translateY(-50%);z-index:3;width:25px;height:25px;padding:0;border:0;border-radius:50%;background:#e8efee;color:#607572;font-size:20px;font-weight:700;line-height:25px;text-align:center;cursor:pointer}
+.field-clear-btn:hover{background:#dce9e7;color:#103534;border:0}
+.field-clear-btn[hidden]{display:none!important}
+
