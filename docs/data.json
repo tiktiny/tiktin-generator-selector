@@ -9,11 +9,12 @@
       "exhaust": "4",
       "roomDimensions": "7.2X3X2.4",
       "silencedAirIn": "0.6",
-      "silencedAirOut": "AP-B10S",
+      "silencedAirOut": "0.36",
       "plans": [
         "https://www.shmerling.co.il/wp-content/uploads/2025/12/חדר-ללא-השתקה-מבט-על.pdf",
         "https://www.shmerling.co.il/wp-content/uploads/2025/12/חדר-ללא-השתקה-חתך.pdf"
-      ]
+      ],
+      "rawAirOut": "0.6"
     },
     "canopy65": {
       "url": "https://www.shmerling.co.il/generator/ap-b10s-4/",
@@ -237,7 +238,7 @@
     "canopy65": {
       "url": "https://www.shmerling.co.il/generator/ap-b100s/",
       "model": "AP-B100S",
-      "dimensions": "2780x1.1x1.71",
+      "dimensions": "2.78X1.1X1.71",
       "weight": "1900",
       "plans": [
         "https://www.shmerling.co.il/wp-content/uploads/2025/11/חופה-למגורים-מבט-צד1-4.pdf",
@@ -247,7 +248,7 @@
     "canopy75": {
       "url": "https://www.shmerling.co.il/generator/ap-b100s-2/",
       "model": "AP-B100S",
-      "dimensions": "2780x1.1x1.71",
+      "dimensions": "2.78X1.1X1.71",
       "weight": "1900",
       "plans": [
         "https://www.shmerling.co.il/wp-content/uploads/2025/11/חופה-למגורים-מבט-צד1-4.pdf",
@@ -274,7 +275,7 @@
     "canopy65": {
       "url": "https://www.shmerling.co.il/generator/ap-b110-2/",
       "model": "AP-B110S",
-      "dimensions": "2780x1.1x1.71",
+      "dimensions": "2.78X1.1X1.71",
       "weight": "1900",
       "plans": [
         "https://www.shmerling.co.il/wp-content/uploads/2024/09/חופה-למגורים-מבט-צד1-4.pdf",
@@ -539,12 +540,14 @@
       "generatorWeight": "2750",
       "exhaust": "4",
       "roomDimensions": "7.7X3.7X2.7",
-      "silencedAirIn": "פתח יציאת אוויר כולל השתקה (W1 X H1)m^2 שטח במ\"ר",
-      "silencedAirOut": "AP-C300S",
+      "silencedAirIn": "2.9",
+      "silencedAirOut": "2.8",
       "plans": [
         "https://www.shmerling.co.il/wp-content/uploads/2024/09/חדר-ללא-השתקה-מבט-על.pdf",
         "https://www.shmerling.co.il/wp-content/uploads/2024/09/חדר-ללא-השתקה-חתך.pdf"
-      ]
+      ],
+      "rawAirIn": "2.86",
+      "rawAirOut": "2.7"
     },
     "canopy65": {
       "url": "https://www.shmerling.co.il/generator/ap-d300s/",
@@ -613,12 +616,14 @@
       "generatorWeight": "3000",
       "exhaust": "4",
       "roomDimensions": "8.9X3.95X2.7",
-      "silencedAirIn": "פתח יציאת אוויר כולל השתקה (W1 X H1)m^2 שטח במ\"ר",
-      "silencedAirOut": "DM-360S",
+      "silencedAirIn": "5.5",
+      "silencedAirOut": "5.3",
       "plans": [
         "https://www.shmerling.co.il/wp-content/uploads/2024/09/חדר-ללא-השתקה-מבט-על.pdf",
         "https://www.shmerling.co.il/wp-content/uploads/2024/09/חדר-ללא-השתקה-חתך.pdf"
-      ]
+      ],
+      "rawAirIn": "3.13",
+      "rawAirOut": "2.97"
     },
     "canopy65": {
       "url": "https://www.shmerling.co.il/generator/ap-b360s-4/",
@@ -1066,13 +1071,14 @@
       "generatorDimensions": "4.63X2.14X2.29",
       "generatorWeight": "9810",
       "exhaust": "12",
-      "roomDimensions": "12.45",
+      "roomDimensions": null,
       "silencedAirIn": "12.45",
       "silencedAirOut": "11.77",
       "plans": [
         "https://www.shmerling.co.il/wp-content/uploads/2024/09/חדר-עם-השתקה-למגורים-מבט-על.pdf",
         "https://www.shmerling.co.il/wp-content/uploads/2024/09/חדר-עם-השתקה-למגורים-חתך.pdf"
-      ]
+      ],
+      "note": "באתר שמרלינג הופיע ערך לא תקין בשדה מידות החדר; הנתון לא מוצג עד לאימות."
     },
     "canopy65": {
       "url": "https://www.shmerling.co.il/generator/ap-t1400-%d7%9e%d7%9b%d7%95%d7%9c%d7%94-2/",
@@ -1155,7 +1161,7 @@
     "kva": 1915,
     "room65": {
       "url": "https://www.shmerling.co.il/generator/ap-t1915s-4/",
-      "model": "מידות גנרטור (מטר)",
+      "model": "AP-T1915S",
       "generatorDimensions": "5.51X2.3X2.52",
       "generatorWeight": "13200",
       "exhaust": "14",
