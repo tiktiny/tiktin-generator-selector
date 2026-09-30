@@ -1,6 +1,6 @@
 
 /* ---------- בדיקת גרסה אוטומטית ---------- */
-const APP_VERSION="V6";
+const APP_VERSION="V7";
 async function checkForAppUpdate(){
   try{
     const r=await fetch("version.json?ts="+Date.now(),{cache:"no-store"});
@@ -59,11 +59,18 @@ window.openExhaust=k=>{
     <div class="exhaust-result"></div>
     <small>התוצאה היא הערכת תכנון בלבד. יש לאמת את הקוטר הסופי מול יצרן המנוע/ספק מערכת הפליטה.</small>
   </div>`;
+  const result=box.querySelector(".exhaust-result");
   const calc=()=>{
     const r=exhaustEstimate(g,box.querySelector("#exh-h").value,box.querySelector("#exh-v").value,box.querySelector("#exh-b").value);
-    box.querySelector(".exhaust-result").innerHTML=`<div><span>קוטר אגזוז מוערך</span><b>${r.dia}″</b></div><div><span>קוטר חיצוני אחרי בידוד</span><b>כ־${r.outside} מ״מ</b></div>`;
+    result.innerHTML=`<div><span>קוטר אגזוז מוערך</span><b>${r.dia}″</b></div><div><span>קוטר חיצוני אחרי בידוד</span><b>כ־${r.outside} מ״מ</b></div>`;
+  };
+  const invalidate=()=>{
+    result.innerHTML='<div class="exhaust-stale">הנתונים השתנו. בסיום הכנסת הערכים יש ללחוץ על „חשב קוטר” כדי לקבל תוצאה מעודכנת.</div>';
   };
   box.querySelector(".exhaust-calc").addEventListener("click",calc);
+  box.querySelector("#exh-h").addEventListener("input",invalidate);
+  box.querySelector("#exh-v").addEventListener("input",invalidate);
+  box.querySelector("#exh-b").addEventListener("change",invalidate);
   box.addEventListener("click",e=>{if(e.target===box)window.closeExhaust()});
   document.body.append(box);calc()
 };
