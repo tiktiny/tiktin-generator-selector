@@ -123,8 +123,8 @@ window.openExhaust=k=>{
     <h3 id="exhaust-title">בדיקת קוטר אגזוז · ${k.toLocaleString()} KVA</h3>
     <p>הערכה ראשונית לפי קוטר מוצא הגנרטור והתוואי. ברירת המחדל היא 4 כיפופי 90°.</p>
     <div class="exhaust-fields">
-      <label><span>אורך אופקי עד הפיר [מ׳]</span><input id="exh-h" type="number" min="0" step="0.5" value="5"></label>
-      <label><span>גובה הפיר עד הגג [מ׳]</span><input id="exh-v" type="number" min="0" step="0.5" value="30"></label>
+      <label><span>אורך אופקי עד הפיר [מ׳]</span><input id="exh-h" type="number" min="0" step="0.5" value=""></label>
+      <label><span>גובה הפיר עד הגג [מ׳]</span><input id="exh-v" type="number" min="0" step="0.5" value=""></label>
       <label><span>מספר כיפופי 90°</span><select id="exh-b"><option>1</option><option>2</option><option>3</option><option selected>4</option></select></label>
     </div>
     <button class="exhaust-calc" type="button">חשב קוטר</button>
@@ -145,6 +145,19 @@ window.openExhaust=k=>{
   box.querySelector("#exh-b").addEventListener("change",invalidate);
   box.addEventListener("click",e=>{if(e.target===box)window.closeExhaust()});
   document.body.append(box);
+  enhanceAllInputs(box);
+  box.querySelectorAll("#exh-h, #exh-v").forEach(input=>{
+    input.addEventListener("click",()=>{
+      if(input.value==="")return;
+      input.dataset.replaceOnType="1";
+      try{input.select()}catch(e){}
+    });
+    input.addEventListener("keydown",e=>{
+      if(input.dataset.replaceOnType!=="1"||e.ctrlKey||e.metaKey||e.altKey||!/^\d$/.test(e.key))return;
+      input.value="";
+      delete input.dataset.replaceOnType;
+    });
+  });
   result.innerHTML='<div class="exhaust-stale">הזן את נתוני התוואי ובסיום לחץ על „חשב קוטר”.</div>';
 };
 window.closeExhaust=()=>{document.querySelector(".exhaust-overlay")?.remove();if(!document.querySelector(".share-overlay")&&!document.querySelector(".plan-overlay"))document.body.classList.remove("modal-open")};
@@ -334,4 +347,3 @@ new MutationObserver(muts=>{
     enhanceAllInputs(n);
   }));
 }).observe(document.body,{childList:true,subtree:true});
-
