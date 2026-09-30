@@ -1,3 +1,21 @@
+
+/* ---------- בדיקת גרסה אוטומטית ---------- */
+const APP_VERSION="V5";
+async function checkForAppUpdate(){
+  try{
+    const r=await fetch("version.json?ts="+Date.now(),{cache:"no-store"});
+    if(!r.ok)return;
+    const v=await r.json();
+    if(v&&v.version&&v.version!==APP_VERSION){
+      const u=new URL(location.href);
+      u.searchParams.set("v",v.version.replace(/^V/,""));
+      location.replace(u.toString());
+    }
+  }catch(e){}
+}
+window.addEventListener("pageshow",()=>checkForAppUpdate());
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")checkForAppUpdate()});
+
 // Published with locally stored Schmerling plan previews for PDF reports.
 let data=[],assets={};const missing="לא צוין באתר שמרלינג";
 const $=s=>document.querySelector(s),arr=v=>!v?[]:Array.isArray(v)?v:[v];
