@@ -54,3 +54,15 @@
   .exhaust-fields input,.exhaust-fields select{font-size:16px!important;line-height:1.25}
   .exhaust-dialog{width:min(620px,100%);max-width:100%;transform:none!important}
 }
+
+/* V11 · ארון סוף תדלוק */
+.share-conds{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 10px;padding:10px;background:#eef7f5;border-radius:11px}
+.share-conds>b{grid-column:1/-1;font-size:14px;color:#103534}
+.share-conds label{display:flex;align-items:center;gap:8px;min-height:44px;padding:8px 10px;background:#fff;border:1px solid #dce9e7;border-radius:10px;cursor:pointer;font-weight:700}
+.share-conds input{width:20px;height:20px;accent-color:#087467}
+.share-options label.cond small{display:block;font-weight:400;font-size:12px;color:#8a5a16;margin-top:2px}
+.share-options label.cond-off{opacity:.55;cursor:not-allowed;background:#f6f8f8}
+.share-more{margin:10px 0 0;font-size:13px;color:#607572}
+.share-more summary{cursor:pointer;font-weight:700;color:#087467}
+.share-more p{margin:6px 0}
+@media (max-width:520px){.share-conds{grid-template-columns:1fr}}
